@@ -9,18 +9,23 @@ just_fix_windows_console()
 console = Console()
 client = genai.Client()
 
+# Словник з інформацією про користувача
 user = {
     "name": "",
     "age": 0
 }
+# Шлях до файлу, який зберігає дані про користувача
 USER_INFO_FILE_PATH = "user_info.json"
 
+# Отримання даних про користувача з файлу
 def get_user_from_file():
     if os.path.exists(USER_INFO_FILE_PATH):
         with open(USER_INFO_FILE_PATH, "r", encoding="utf-8") as file:
             return json.load(file)
     return None
 
+# Отримання даних про користувача з консолі
+# (введення даних через input)
 def get_user_from_console():
     info = {
         "name": input("Введіть своє ім'я: "),
@@ -29,10 +34,12 @@ def get_user_from_console():
     save_user(info)
     return info
 
+# Збереження даних про користувача у файл
 def save_user(user_info):
     with open(USER_INFO_FILE_PATH, "w", encoding="utf-8") as file:
         json.dump(user_info, file)
 
+# Отримання словника з json-рядка
 def get_json(response):
     return json.loads(
         str(response.text).removeprefix("```json") \
@@ -40,9 +47,12 @@ def get_json(response):
     )
 
 print(" — ШІ-асистента запущено!\n")
+# Якщо файл з даними користувача існує
 if os.path.exists(USER_INFO_FILE_PATH):
+    # Отримуємо дані з файлу
     user = get_user_from_file()
 else:
+    # Просимо ввести дані в консоль
     user = get_user_from_console()
 
 while True:
@@ -66,13 +76,15 @@ while True:
     )
 
     print("\n")
+    #  Відповідь сервера перетворюємо на словник
     response_json = get_json(response)
-    # print(response_text)
+
     # Виведення відповіді для користувача
     console.print(
         Markdown(response_json["answer"])
     )
     # Збереження оновленої інформації про користувача
+    # (у змінну та файл)
     user = response_json["user"]
     save_user(user)
 
